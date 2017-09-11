@@ -12,20 +12,24 @@ headers = {
 
 # 使用登录cookie信息
 session = requests.session()
-session.cookies = cookielib.LWPCookieJar(filename='cookies.txt')
+session.cookies = cookielib.LWPCookieJar(filename='cookies')
 try:
     session.cookies.load(ignore_discard=True)
 except:
     print("cookie未能加载")
 
 
-def get_xrsf():
+def get_xsrf():
     # 获取表单数据中的_xsrf
     index_url = 'https://www.zhihu.com'
     response = session.get(index_url, headers=headers)
     match_obj = re.match('.*name="_xsrf" value="(.*?)"', response.text)
     if match_obj:
+        m = match_obj.group(1)
+        a = m
         return match_obj.group(1)
+    else:
+        return ""
 
 
 def zhihu_login(account, password):
@@ -33,22 +37,26 @@ def zhihu_login(account, password):
     if re.match("^1\d{10}", account):
         print("手机号码登录 \n")
         post_url = "https://www.zhihu.com/login/phone_num"
+        xsrf = get_xsrf()
         post_data = {
-            "_xsrf": get_xrsf(),
-            "phone_num": account,
-            "password": password
+            '_xsrf': xsrf,
+            'password': password,
+            "captcha_type": "cn",
+            'phone_num': account,
         }
     else:
         if "@" in account:
             post_url = 'http://www.zhihu.com/login/email'
             print("邮箱登录 \n")
+            xsrf = get_xsrf()
             post_data = {
-                "_xsrf": get_xrsf(),
+                "_xsrf": xsrf,
+                "password": password,
+                "captcha_type": "cn",
                 "email": account,
-                "password": password
             }
 
-    login_page = session.get(post_url, data=post_data, headers=headers)
+    login_page = session.post(post_url, data=post_data, headers=headers)
     session.cookies.save()
 
 
@@ -56,14 +64,16 @@ def is_login():
     # 通过查看用户个人信息来判断是否已经登录
     url = "https://www.zhihu.com/settings/profile"
     response = session.get(url, headers=headers, allow_redirects=False)
-    if response.status_code == 200:
+    if int(response.status_code) == 200:
         return True
     else:
         return False
 
 
 if __name__ == '__main__':
+    zhihu_login("17780625910", "batman123")
     if is_login():
-        print('您已经登录')
+        print('您已经登录！')
     else:
-        zhihu_login("xxx", "xxx")
+        print("没有登录")
+
