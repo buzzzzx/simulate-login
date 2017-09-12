@@ -83,15 +83,6 @@ def crawl_cj():
         m = 0
 
         sheet = wb.add_sheet(xq_title.strip(), cell_overwrite_ok=True)
-        # for bt in bts:
-        #     sheet.write(0, col_num0, bt.strip())
-        #
-        # for i in range(nums[x]):
-        #     row1 = sheet.row(row_num + 1)
-        #     row1.write(col_num1, data[m][i].strip())
-        #
-        #     col_num1 += 1
-        #     row_num += 1
 
         for bt in bts:
             sheet.write(0, col_num, bt.strip())
@@ -111,5 +102,5 @@ def crawl_cj():
 
 
 if __name__ == '__main__':
-    login("201531100159", "EBIHEB")
+    login("your number", "your pwd")
     crawl_cj()
